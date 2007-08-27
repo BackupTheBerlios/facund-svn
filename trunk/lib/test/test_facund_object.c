@@ -84,10 +84,78 @@ START_TEST(pkg_freebsd_object_bool_false)
 {
 	struct facund_object *obj;
 
-	/* Test accessing an object set to true will succeed */
+	/* Test accessing an object set to false will succeed */
 	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
 
 	fail_unless(facund_object_set_bool(obj, 0) == 0, NULL);
+	fail_unless(facund_object_get_bool(obj) == 0, NULL);
+	fail_unless(strcmp(facund_object_xml_string(obj),
+	    "<data type=\"bool\">false</data>") == 0, NULL);
+
+	facund_object_free(obj);
+}
+END_TEST
+
+START_TEST(pkg_freebsd_object_bool_true_from_str)
+{
+	struct facund_object *obj;
+
+	/* Test accessing an object set to false from a string will succeed*/
+	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
+
+	fail_unless(facund_object_set_from_str(obj, "true") == 0, NULL);
+	fail_unless(facund_object_get_bool(obj) == 1, NULL);
+	fail_unless(strcmp(facund_object_xml_string(obj),
+	    "<data type=\"bool\">true</data>") == 0, NULL);
+
+	facund_object_free(obj);
+
+	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
+
+	fail_unless(facund_object_set_from_str(obj, "TRUE") == 0, NULL);
+	fail_unless(facund_object_get_bool(obj) == 1, NULL);
+	fail_unless(strcmp(facund_object_xml_string(obj),
+	    "<data type=\"bool\">true</data>") == 0, NULL);
+
+	facund_object_free(obj);
+
+	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
+
+	fail_unless(facund_object_set_from_str(obj, "TrUe") == 0, NULL);
+	fail_unless(facund_object_get_bool(obj) == 1, NULL);
+	fail_unless(strcmp(facund_object_xml_string(obj),
+	    "<data type=\"bool\">true</data>") == 0, NULL);
+
+	facund_object_free(obj);
+}
+END_TEST
+
+START_TEST(pkg_freebsd_object_bool_false_from_str)
+{
+	struct facund_object *obj;
+
+	/* Test accessing an object set to false from a string will succeed*/
+	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
+
+	fail_unless(facund_object_set_from_str(obj, "false") == 0, NULL);
+	fail_unless(facund_object_get_bool(obj) == 0, NULL);
+	fail_unless(strcmp(facund_object_xml_string(obj),
+	    "<data type=\"bool\">false</data>") == 0, NULL);
+
+	facund_object_free(obj);
+
+	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
+
+	fail_unless(facund_object_set_from_str(obj, "FALSE") == 0, NULL);
+	fail_unless(facund_object_get_bool(obj) == 0, NULL);
+	fail_unless(strcmp(facund_object_xml_string(obj),
+	    "<data type=\"bool\">false</data>") == 0, NULL);
+
+	facund_object_free(obj);
+
+	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
+
+	fail_unless(facund_object_set_from_str(obj, "FaLsE") == 0, NULL);
 	fail_unless(facund_object_get_bool(obj) == 0, NULL);
 	fail_unless(strcmp(facund_object_xml_string(obj),
 	    "<data type=\"bool\">false</data>") == 0, NULL);
@@ -252,6 +320,8 @@ facund_object_suite()
 	tcase_add_test(tc, pkg_freebsd_object_bool_create);
 	tcase_add_test(tc, pkg_freebsd_object_bool_true);
 	tcase_add_test(tc, pkg_freebsd_object_bool_false);
+	tcase_add_test(tc, pkg_freebsd_object_bool_true_from_str);
+	tcase_add_test(tc, pkg_freebsd_object_bool_false_from_str);
 	tcase_add_test(tc, pkg_freebsd_object_bool_error);
 	suite_add_tcase(s, tc);
 
