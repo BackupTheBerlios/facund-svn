@@ -27,12 +27,45 @@
 
 #include "test.h"
 
+/* Tests for a facund_connection server */
+START_TEST(pkg_freebsd_connection_server_null)
+{
+	/* Check a NULL argument returns NULL */
+	fail_unless(facund_connect_server(NULL) == NULL);
+}
+END_TEST
+
+/* Tests for a facund_connection client */
+START_TEST(pkg_freebsd_connection_client_null)
+{
+	/* Check a NULL argument returns NULL */
+	fail_unless(facund_connect_client(NULL) == NULL);
+}
+END_TEST
+
+START_TEST(pkg_freebsd_connection_client_nonexistant)
+{
+	/* Check a non-existant socket returns NULL */
+	fail_unless(facund_connect_server("/nonexistant") == NULL);
+}
+END_TEST
+
 Suite *
 facund_connection_suite()
 {
 	Suite *s;
+	TCase *tc;
 
 	s = suite_create("facund_connection");
+
+	tc = tcase_create("server");
+	tcase_add_test(tc, pkg_freebsd_connection_server_null);
+	suite_add_tcase(s, tc);
+
+	tc = tcase_create("server");
+	tcase_add_test(tc, pkg_freebsd_connection_client_null);
+	tcase_add_test(tc, pkg_freebsd_connection_client_nonexistant);
+	suite_add_tcase(s, tc);
 
 	return s;
 }

@@ -27,9 +27,20 @@
 
 #include "test.h"
 
+#include <stdlib.h>
+
 int
 main(int argc __unused, char *argv[] __unused)
 {
-	return 0;
+	int fail_count;
+	SRunner *sr;
+
+	sr = srunner_create(facund_connection_suite());
+
+	srunner_run_all(sr, CK_NORMAL);
+	fail_count = srunner_ntests_failed(sr);
+	srunner_free(sr);
+
+	return (fail_count == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
