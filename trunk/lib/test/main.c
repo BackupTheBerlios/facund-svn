@@ -36,6 +36,7 @@ main(int argc __unused, char *argv[] __unused)
 	SRunner *sr;
 
 	sr = srunner_create(facund_connection_suite());
+	srunner_add_suite(sr, facund_object_suite());
 
 	srunner_run_all(sr, CK_NORMAL);
 	fail_count = srunner_ntests_failed(sr);

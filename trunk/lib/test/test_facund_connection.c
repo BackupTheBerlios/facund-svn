@@ -27,6 +27,8 @@
 
 #include "test.h"
 
+#include <facund_connection.h>
+
 /* Tests for a facund_connection server */
 START_TEST(pkg_freebsd_connection_server_null)
 {
