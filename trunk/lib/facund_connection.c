@@ -29,6 +29,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include <assert.h>
 #include <err.h>
 #include <errno.h>
 #include <stdio.h>
@@ -49,6 +50,7 @@ facund_create(const char *sock)
 {
 	struct facund_conn *conn;
 
+	assert(sock != NULL);
 	conn = calloc(1, sizeof(struct facund_conn));
 	if (conn == NULL) {
 		return NULL;
@@ -79,6 +81,9 @@ facund_connect_server(const char *sock)
 {
 	struct facund_conn *conn;
 
+	if (sock == NULL) {
+		return NULL;
+	}
 	conn = facund_create(sock);
 	if (conn == NULL) {
 		return NULL;
@@ -109,6 +114,9 @@ facund_connect_client(const char *s)
 {
 	struct facund_conn *conn;
 
+	if (s == NULL) {
+		return NULL;
+	}
 	conn = facund_create(s);
 	if (conn == NULL) {
 		return NULL;
