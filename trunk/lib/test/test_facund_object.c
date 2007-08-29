@@ -31,7 +31,58 @@
 
 #include <string.h>
 
-#define test_is_not_type(realtype, testtype, value, errvalue) do { \
+#define test_object_create(objtype, typeenum, errvalue) \
+do { \
+	struct facund_object *theobj; \
+	fail_unless((theobj = facund_object_new_##objtype()) != NULL, NULL); \
+	fail_unless(facund_object_get_type(theobj) == typeenum, NULL); \
+	fail_unless(facund_object_get_##objtype(theobj) == errvalue, NULL); \
+	fail_unless(facund_object_xml_string(theobj) == NULL, NULL); \
+	facund_object_free(theobj); \
+} while(0)
+
+#define test_object_assign(objtype, strtype, value, strvalue) \
+do { \
+	struct facund_object *theobj; \
+	fail_unless((theobj = facund_object_new_##objtype()) != NULL, NULL); \
+	fail_unless(facund_object_set_##objtype(theobj, value) == 0, NULL); \
+	fail_unless(facund_object_get_##objtype(theobj) == value, NULL); \
+	fail_unless(strcmp(facund_object_xml_string(theobj), \
+	    "<data type=\""strtype"\">"strvalue"</data>") == 0, NULL); \
+	facund_object_free(theobj); \
+} while (0)
+
+#define test_object_assign_from_string(objtype, strtype, value, strvalue, \
+    expstrvalue) \
+do { \
+	struct facund_object *theobj; \
+	fail_unless((theobj = facund_object_new_##objtype()) != NULL, NULL); \
+	fail_unless(facund_object_set_from_str(theobj, strvalue) == 0, NULL); \
+	fail_unless(facund_object_get_##objtype(theobj) == value, NULL); \
+	fail_unless(strcmp(facund_object_xml_string(theobj), \
+	    "<data type=\""strtype"\">"expstrvalue"</data>") == 0, NULL); \
+	facund_object_free(theobj); \
+} while(0)
+
+#define test_object_error(objtype) \
+do { \
+	struct facund_object *theobj; \
+	fail_unless((theobj = facund_object_new_##objtype()) != NULL, NULL); \
+	fail_unless(facund_object_get_error(theobj) == \
+	    FACUND_OBJECT_ERROR_NONE, NULL); \
+	/* This should cause an error flag to be set */ \
+	facund_object_get_##objtype(theobj); \
+	fail_unless(facund_object_get_error(theobj) == \
+	    FACUND_OBJECT_ERROR_UNASSIGNED, NULL); \
+	/* This should reset the error flag */ \
+	facund_object_set_##objtype(theobj, 0); \
+	fail_unless(facund_object_get_error(theobj) == \
+	    FACUND_OBJECT_ERROR_NONE, NULL); \
+	facund_object_free(theobj); \
+} while (0)
+
+#define test_is_not_type(realtype, testtype, value, errvalue) \
+do { \
 	struct facund_object *newobj; \
 	fail_unless((newobj = facund_object_new_##realtype()) != NULL, NULL); \
 		facund_object_set_##realtype(newobj, value); \
@@ -41,6 +92,17 @@
 		    FACUND_OBJECT_ERROR_WRONG_TYPE, NULL); \
 	facund_object_free(newobj); \
 } while(0)
+
+#define test_object_is_not_array(objtype, value) \
+do { \
+	struct facund_object *theobj; \
+	fail_unless((theobj = facund_object_new_##objtype()) != NULL, NULL); \
+	facund_object_set_##objtype(theobj, value); \
+	fail_unless(facund_object_get_array_item(theobj, 0) == NULL, NULL); \
+	fail_unless(facund_object_get_error(theobj) == \
+	    FACUND_OBJECT_ERROR_WRONG_TYPE, NULL); \
+	facund_object_free(theobj); \
+} while (0)
 
 /*
  * Tests for a boolean facund_object
@@ -56,15 +118,7 @@ END_TEST
 
 START_TEST(pkg_freebsd_object_bool_create)
 {
-	struct facund_object *obj;
-
-	/* Test accessing an unassigned object will fail */
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-	fail_unless(facund_object_get_type(obj) == FACUND_BOOL, NULL);
-	fail_unless(facund_object_get_bool(obj) == -1, NULL);
-	fail_unless(facund_object_xml_string(obj) == NULL, NULL);
-
-	facund_object_free(obj);
+	test_object_create(bool, FACUND_BOOL, -1);
 }
 END_TEST
 
@@ -73,14 +127,7 @@ START_TEST(pkg_freebsd_object_bool_true)
 	struct facund_object *obj;
 
 	/* Test accessing an object set to true will succeed */
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-
-	fail_unless(facund_object_set_bool(obj, 1) == 0, NULL);
-	fail_unless(facund_object_get_bool(obj) == 1, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"bool\">true</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign(bool, "bool", 1, "true");
 
 	/* Test setting something that is not 1 is also true */
 	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
@@ -93,129 +140,41 @@ END_TEST
 
 START_TEST(pkg_freebsd_object_bool_false)
 {
-	struct facund_object *obj;
-
 	/* Test accessing an object set to false will succeed */
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-
-	fail_unless(facund_object_set_bool(obj, 0) == 0, NULL);
-	fail_unless(facund_object_get_bool(obj) == 0, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"bool\">false</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign(bool, "bool", 0, "false");
 }
 END_TEST
 
 START_TEST(pkg_freebsd_object_bool_true_from_str)
 {
-	struct facund_object *obj;
-
 	/* Test accessing an object set to false from a string will succeed*/
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "true") == 0, NULL);
-	fail_unless(facund_object_get_bool(obj) == 1, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"bool\">true</data>") == 0, NULL);
-
-	facund_object_free(obj);
-
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "TRUE") == 0, NULL);
-	fail_unless(facund_object_get_bool(obj) == 1, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"bool\">true</data>") == 0, NULL);
-
-	facund_object_free(obj);
-
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "TrUe") == 0, NULL);
-	fail_unless(facund_object_get_bool(obj) == 1, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"bool\">true</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign_from_string(bool, "bool", 1, "true", "true");
+	test_object_assign_from_string(bool, "bool", 1, "TRUE", "true");
+	test_object_assign_from_string(bool, "bool", 1, "TrUe", "true");
 }
 END_TEST
 
 START_TEST(pkg_freebsd_object_bool_false_from_str)
 {
-	struct facund_object *obj;
-
 	/* Test accessing an object set to false from a string will succeed*/
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "false") == 0, NULL);
-	fail_unless(facund_object_get_bool(obj) == 0, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"bool\">false</data>") == 0, NULL);
-
-	facund_object_free(obj);
-
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "FALSE") == 0, NULL);
-	fail_unless(facund_object_get_bool(obj) == 0, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"bool\">false</data>") == 0, NULL);
-
-	facund_object_free(obj);
-
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "FaLsE") == 0, NULL);
-	fail_unless(facund_object_get_bool(obj) == 0, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"bool\">false</data>") == 0, NULL);
-
-	facund_object_free(obj);
-
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "string") == 0, NULL);
-	fail_unless(facund_object_get_bool(obj) == 0, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"bool\">false</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign_from_string(bool, "bool", 0, "false", "false");
+	test_object_assign_from_string(bool, "bool", 0, "FALSE", "false");
+	test_object_assign_from_string(bool, "bool", 0, "FaLsE", "false");
+	test_object_assign_from_string(bool, "bool", 0, "string", "false");
 }
 END_TEST
 
 START_TEST(pkg_freebsd_object_bool_error)
 {
-	struct facund_object *obj;
-
 	/* Test errors are set/reset correctly */
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-	fail_unless(facund_object_get_error(obj) == FACUND_OBJECT_ERROR_NONE,
-	    NULL);
+	test_object_error(bool);
 
-	/* This should cause an error flag to be set */
-	facund_object_get_bool(obj);
-	fail_unless(facund_object_get_error(obj) ==
-	    FACUND_OBJECT_ERROR_UNASSIGNED, NULL);
-
-	/* This should reset the error flag */
-	facund_object_set_bool(obj, 0);
-	fail_unless(facund_object_get_error(obj) == FACUND_OBJECT_ERROR_NONE,
-	    NULL);
-
-	facund_object_free(obj);
-
-	/* These should fail as they are the wrong types */
+	/* Test accessing with the wrong accessor fails */
 	test_is_not_type(bool, int, 0, 0);
 	test_is_not_type(bool, uint, 0, 0);
 	test_is_not_type(bool, string, 0, 0);
 
-	fail_unless((obj = facund_object_new_bool()) != NULL, NULL);
-		facund_object_set_bool(obj, 0);
-		fail_unless(facund_object_get_array_item(obj, 0) == NULL, NULL);
-		fail_unless(facund_object_get_error(obj) ==
-		    FACUND_OBJECT_ERROR_WRONG_TYPE, NULL);
-	facund_object_free(obj);
+	test_object_is_not_array(bool, 0);
 }
 END_TEST
 
@@ -234,84 +193,36 @@ END_TEST
 
 START_TEST(pkg_freebsd_object_int_create)
 {
-	struct facund_object *obj;
-
 	/* Tests accessing an unassigned int will fail */
-	fail_unless((obj = facund_object_new_int()) != NULL, NULL);
-	fail_unless(facund_object_get_error(obj) == FACUND_OBJECT_ERROR_NONE,
-	    NULL);
-	fail_unless(facund_object_get_type(obj) == FACUND_INT, NULL);
-	fail_unless(facund_object_get_int(obj) == 0, NULL);
-	fail_unless(facund_object_get_error(obj) ==
-	    FACUND_OBJECT_ERROR_UNASSIGNED, NULL);
-	facund_object_free(obj);
+	test_object_create(int, FACUND_INT, 0);
 }
 END_TEST
 
 START_TEST(pkg_freebsd_object_int_zero)
 {
-	struct facund_object *obj;
-
 	/* Test accessing an object set to 0 will succeed */
-	fail_unless((obj = facund_object_new_int()) != NULL, NULL);
-
-	fail_unless(facund_object_set_int(obj, 0) == 0, NULL);
-	fail_unless(facund_object_get_int(obj) == 0, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"int\">0</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign(int, "int", 0, "0");
 }
 END_TEST
 
 START_TEST(pkg_freebsd_object_int_zero_from_str)
 {
-	struct facund_object *obj;
-
 	/* Test accessing an object set to 0 from a string will succeed */
-	fail_unless((obj = facund_object_new_int()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "0") == 0, NULL);
-	fail_unless(facund_object_get_int(obj) == 0, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"int\">0</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign_from_string(int, "int", 0, "0", "0");
 }
 END_TEST
 
 START_TEST(pkg_freebsd_object_int_min)
 {
-	struct facund_object *obj;
-
 	/* Test accessing an object set to -2147483648 will succeed */
-	fail_unless((obj = facund_object_new_int()) != NULL, NULL);
-
-	fail_unless(facund_object_set_int(obj, INT32_MIN) == 0, NULL);
-	fail_unless(facund_object_get_int(obj) == INT32_MIN, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"int\">-2147483648</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign(int, "int", INT32_MIN, "-2147483648");
 }
 END_TEST
 
 START_TEST(pkg_freebsd_object_int_min_from_str)
 {
-	struct facund_object *obj;
-
-	/*
-	 * Test accessing an object set to
-	 * -2147483648 from a string will succeed
-	 */
-	fail_unless((obj = facund_object_new_int()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "-2147483648") == 0, NULL);
-	fail_unless(facund_object_get_int(obj) == INT32_MIN, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"int\">-2147483648</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign_from_string(int, "int", INT32_MIN, "-2147483648",
+	    "-2147483648");
 }
 END_TEST
 
@@ -336,36 +247,15 @@ END_TEST
 
 START_TEST(pkg_freebsd_object_int_max)
 {
-	struct facund_object *obj;
-
 	/* Test accessing an object set to 2147483647 will succeed */
-	fail_unless((obj = facund_object_new_int()) != NULL, NULL);
-
-	fail_unless(facund_object_set_int(obj, INT32_MAX) == 0, NULL);
-	fail_unless(facund_object_get_int(obj) == INT32_MAX, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"int\">2147483647</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign(int, "int", INT32_MAX, "2147483647");
 }
 END_TEST
 
 START_TEST(pkg_freebsd_object_int_max_from_str)
 {
-	struct facund_object *obj;
-
-	/*
-	 * Test accessing an object set to
-	 * 2147483647 from a string will succeed
-	 */
-	fail_unless((obj = facund_object_new_int()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "2147483647") == 0, NULL);
-	fail_unless(facund_object_get_int(obj) == INT32_MAX, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"int\">2147483647</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign_from_string(int, "int", INT32_MAX, "2147483647",
+	    "2147483647");
 }
 END_TEST
 
@@ -409,36 +299,15 @@ END_TEST
 
 START_TEST(pkg_freebsd_object_int_error)
 {
-	struct facund_object *obj;
-
 	/* Test errors are set/reset correctly */
-	fail_unless((obj = facund_object_new_int()) != NULL, NULL);
-	fail_unless(facund_object_get_error(obj) == FACUND_OBJECT_ERROR_NONE,
-	    NULL);
+	test_object_error(int);
 
-	/* This should cause an error flag to be set */
-	facund_object_get_int(obj);
-	fail_unless(facund_object_get_error(obj) ==
-	    FACUND_OBJECT_ERROR_UNASSIGNED, NULL);
-
-	/* This should reset the error flag */
-	facund_object_set_int(obj, 0);
-	fail_unless(facund_object_get_error(obj) == FACUND_OBJECT_ERROR_NONE,
-	    NULL);
-
-	facund_object_free(obj);
-
-	/* These should fail as they are the wrong types */
+	/* Test accessing with the wrong accessor fails */
 	test_is_not_type(int, bool, 0, -1);
 	test_is_not_type(int, uint, 0, 0);
 	test_is_not_type(int, string, 0, 0);
 
-	fail_unless((obj = facund_object_new_int()) != NULL, NULL);
-		facund_object_set_int(obj, 0);
-		fail_unless(facund_object_get_array_item(obj, 0) == NULL, NULL);
-		fail_unless(facund_object_get_error(obj) ==
-		    FACUND_OBJECT_ERROR_WRONG_TYPE, NULL);
-	facund_object_free(obj);
+	test_object_is_not_array(int, 0);
 }
 END_TEST
 
@@ -456,49 +325,21 @@ END_TEST
 
 START_TEST(pkg_freebsd_object_uint_create)
 {
-	struct facund_object *obj;
-
 	/* Test accessing an unassigned unsigned int will fail */
-	fail_unless((obj = facund_object_new_uint()) != NULL, NULL);
-	fail_unless(facund_object_get_error(obj) == FACUND_OBJECT_ERROR_NONE,
-	    NULL);
-	fail_unless(facund_object_get_type(obj) == FACUND_UINT, NULL);
-	fail_unless(facund_object_get_uint(obj) == 0, NULL);
-	fail_unless(facund_object_get_error(obj) ==
-	    FACUND_OBJECT_ERROR_UNASSIGNED, NULL);
-	facund_object_free(obj);
+	test_object_create(uint, FACUND_UINT, 0);
 }
 END_TEST
 
 START_TEST(pkg_freebsd_object_uint_min)
 {
-	struct facund_object *obj;
-
 	/* Test accessing an object set to 0 will succeed */
-	fail_unless((obj = facund_object_new_uint()) != NULL, NULL);
-
-	fail_unless(facund_object_set_uint(obj, 0) == 0, NULL);
-	fail_unless(facund_object_get_uint(obj) == 0, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"unsigned int\">0</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign(uint, "unsigned int", 0, "0");
 }
 END_TEST
 
 START_TEST(pkg_freebsd_object_uint_min_from_str)
 {
-	struct facund_object *obj;
-
-	/* Test accessing an object set to 0 from a string will succeed */
-	fail_unless((obj = facund_object_new_uint()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "0") == 0, NULL);
-	fail_unless(facund_object_get_uint(obj) == 0, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"unsigned int\">0</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign_from_string(uint, "unsigned int", 0, "0", "0");
 }
 END_TEST
 
@@ -523,36 +364,15 @@ END_TEST
 
 START_TEST(pkg_freebsd_object_uint_max)
 {
-	struct facund_object *obj;
-
 	/* Test accessing an object set to 4294967295 will succeed */
-	fail_unless((obj = facund_object_new_uint()) != NULL, NULL);
-
-	fail_unless(facund_object_set_uint(obj, UINT32_MAX) == 0, NULL);
-	fail_unless(facund_object_get_uint(obj) == UINT32_MAX, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"unsigned int\">4294967295</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign(uint, "unsigned int", UINT32_MAX, "4294967295");
 }
 END_TEST
 
 START_TEST(pkg_freebsd_object_uint_max_from_str)
 {
-	struct facund_object *obj;
-
-	/*
-	 * Test accessing an object set to
-	 * 4294967295 from a string will succeed
-	 */
-	fail_unless((obj = facund_object_new_uint()) != NULL, NULL);
-
-	fail_unless(facund_object_set_from_str(obj, "4294967295") == 0, NULL);
-	fail_unless(facund_object_get_uint(obj) == UINT32_MAX, NULL);
-	fail_unless(strcmp(facund_object_xml_string(obj),
-	    "<data type=\"unsigned int\">4294967295</data>") == 0, NULL);
-
-	facund_object_free(obj);
+	test_object_assign_from_string(uint, "unsigned int", UINT32_MAX,
+	    "4294967295", "4294967295");
 }
 END_TEST
 
@@ -596,36 +416,14 @@ END_TEST
 
 START_TEST(pkg_freebsd_object_uint_error)
 {
-	struct facund_object *obj;
-
 	/* Test errors are set/reset correctly */
-	fail_unless((obj = facund_object_new_uint()) != NULL, NULL);
-	fail_unless(facund_object_get_error(obj) == FACUND_OBJECT_ERROR_NONE,
-	    NULL);
+	test_object_error(uint);
 
-	/* This should cause an error flag to be set */
-	facund_object_get_uint(obj);
-	fail_unless(facund_object_get_error(obj) ==
-	    FACUND_OBJECT_ERROR_UNASSIGNED, NULL);
-
-	/* This should reset the error flag */
-	facund_object_set_uint(obj, 0);
-	fail_unless(facund_object_get_error(obj) == FACUND_OBJECT_ERROR_NONE,
-	    NULL);
-
-	facund_object_free(obj);
-
-	/* These should fail as they are the wrong types */
+	/* Test accessing an object with the wrong accessor fails */
 	test_is_not_type(uint, bool, 0, -1);
 	test_is_not_type(uint, int, 0, 0);
 	test_is_not_type(uint, string, 0, 0);
-
-	fail_unless((obj = facund_object_new_uint()) != NULL, NULL);
-		facund_object_set_int(obj, 0);
-		fail_unless(facund_object_get_array_item(obj, 0) == NULL, NULL);
-		fail_unless(facund_object_get_error(obj) ==
-		    FACUND_OBJECT_ERROR_WRONG_TYPE, NULL);
-	facund_object_free(obj);
+	test_object_is_not_array(uint, 0);
 }
 END_TEST
 
@@ -643,17 +441,8 @@ END_TEST
 
 START_TEST(pkg_freebsd_object_string_create)
 {
-	struct facund_object *obj;
-
 	/* Test accessing an unassigned string will fail */
-	fail_unless((obj = facund_object_new_string()) != NULL, NULL);
-	fail_unless(facund_object_get_error(obj) == FACUND_OBJECT_ERROR_NONE,
-	    NULL);
-	fail_unless(facund_object_get_type(obj) == FACUND_STRING, NULL);
-	fail_unless(facund_object_get_string(obj) == NULL, NULL);
-	fail_unless(facund_object_get_error(obj) ==
-	    FACUND_OBJECT_ERROR_UNASSIGNED, NULL);
-	facund_object_free(obj);
+	test_object_create(string, FACUND_STRING, 0);
 }
 END_TEST
 
@@ -705,7 +494,7 @@ facund_object_suite()
 	tcase_add_test(tc, pkg_freebsd_object_uint_max_from_str);
 	tcase_add_test(tc, pkg_freebsd_object_uint_bad_max_from_str);
 	tcase_add_test(tc, pkg_freebsd_object_uint_bad_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_int_error);
+	tcase_add_test(tc, pkg_freebsd_object_uint_error);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("string");
