@@ -53,6 +53,10 @@ facund_response_new(const char *id, facund_response_code code,
 {
 	struct facund_response *resp;
 
+	if (message == NULL) {
+		return NULL;
+	}
+
 	resp = calloc(1, sizeof(struct facund_response));
 	if (resp == NULL)
 		return NULL;
@@ -63,22 +67,12 @@ facund_response_new(const char *id, facund_response_code code,
 	resp->resp_code = code;
 	resp->resp_msg = strdup(message);
 	resp->resp_return = obj;
-	if (resp->resp_id == NULL || resp->resp_msg == NULL) {
+	if ((id != NULL && resp->resp_id == NULL) || resp->resp_msg == NULL) {
 		facund_response_free(resp);
 		return NULL;
 	}
 
 	return resp;
-}
-
-int
-facund_response_set_id(struct facund_response *resp, const char *id)
-{
-	if (resp == NULL || id == NULL) {
-		return -1;
-	}
-
-	return -1;
 }
 
 /*
