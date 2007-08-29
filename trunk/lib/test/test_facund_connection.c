@@ -36,14 +36,14 @@
 /*
  * Tests for a facund_connection server
  */
-START_TEST(pkg_freebsd_connection_server_null)
+START_TEST(facund_connection_server_null)
 {
 	/* Check a NULL argument returns NULL */
 	fail_unless(facund_connect_server(NULL) == NULL);
 }
 END_TEST
 
-START_TEST(pkg_freebsd_connection_server_good)
+START_TEST(facund_connection_server_good)
 {
 	struct facund_conn *conn;
 	struct stat sb;
@@ -62,14 +62,14 @@ END_TEST
 /*
  * Tests for a facund_connection client
  */
-START_TEST(pkg_freebsd_connection_client_null)
+START_TEST(facund_connection_client_null)
 {
 	/* Check a NULL argument returns NULL */
 	fail_unless(facund_connect_client(NULL) == NULL);
 }
 END_TEST
 
-START_TEST(pkg_freebsd_connection_client_nonexistant)
+START_TEST(facund_connection_client_nonexistant)
 {
 	/* Check a non-existant socket returns NULL */
 	fail_unless(facund_connect_client("/nonexistant") == NULL, NULL);
@@ -79,7 +79,7 @@ END_TEST
 /*
  * Tests for both working together
  */
-START_TEST(pkg_freebsd_connection_cs_connects)
+START_TEST(facund_connection_cs_connects)
 {
 	char buf[5];
 
@@ -116,17 +116,17 @@ facund_connection_suite()
 	s = suite_create("facund_connection");
 
 	tc = tcase_create("server");
-	tcase_add_test(tc, pkg_freebsd_connection_server_null);
-	tcase_add_test(tc, pkg_freebsd_connection_server_good);
+	tcase_add_test(tc, facund_connection_server_null);
+	tcase_add_test(tc, facund_connection_server_good);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("client");
-	tcase_add_test(tc, pkg_freebsd_connection_client_null);
-	tcase_add_test(tc, pkg_freebsd_connection_client_nonexistant);
+	tcase_add_test(tc, facund_connection_client_null);
+	tcase_add_test(tc, facund_connection_client_nonexistant);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("client server");
-	tcase_add_test(tc, pkg_freebsd_connection_cs_connects);
+	tcase_add_test(tc, facund_connection_cs_connects);
 	suite_add_tcase(s, tc);
 
 	return s;

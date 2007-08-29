@@ -1,5 +1,6 @@
 PROG=	tests
-SRCS=	main.c test_facund_connection.c test_facund_object.c
+SRCS=	main.c test_facund_connection.c test_facund_object.c \
+	test_facund_response.c
 
 WARNS?=		6
 

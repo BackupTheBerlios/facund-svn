@@ -107,7 +107,7 @@ do { \
 /*
  * Tests for a boolean facund_object
  */
-START_TEST(pkg_freebsd_object_bool_null)
+START_TEST(facund_object_bool_null)
 {
 	/* Test if bool functions will fail correctly when passes NULL */
 	fail_unless(facund_object_set_bool(NULL, 0) == -1, NULL);
@@ -116,13 +116,13 @@ START_TEST(pkg_freebsd_object_bool_null)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_bool_create)
+START_TEST(facund_object_bool_create)
 {
 	test_object_create(bool, FACUND_BOOL, -1);
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_bool_true)
+START_TEST(facund_object_bool_true)
 {
 	struct facund_object *obj;
 
@@ -138,14 +138,14 @@ START_TEST(pkg_freebsd_object_bool_true)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_bool_false)
+START_TEST(facund_object_bool_false)
 {
 	/* Test accessing an object set to false will succeed */
 	test_object_assign(bool, "bool", 0, "false");
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_bool_true_from_str)
+START_TEST(facund_object_bool_true_from_str)
 {
 	/* Test accessing an object set to false from a string will succeed*/
 	test_object_assign_from_string(bool, "bool", 1, "true", "true");
@@ -154,7 +154,7 @@ START_TEST(pkg_freebsd_object_bool_true_from_str)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_bool_false_from_str)
+START_TEST(facund_object_bool_false_from_str)
 {
 	/* Test accessing an object set to false from a string will succeed*/
 	test_object_assign_from_string(bool, "bool", 0, "false", "false");
@@ -164,7 +164,7 @@ START_TEST(pkg_freebsd_object_bool_false_from_str)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_bool_error)
+START_TEST(facund_object_bool_error)
 {
 	/* Test errors are set/reset correctly */
 	test_object_error(bool);
@@ -181,7 +181,7 @@ END_TEST
 /*
  * Tests for an integer facund_object
  */
-START_TEST(pkg_freebsd_object_int_null)
+START_TEST(facund_object_int_null)
 {
 	/* Test if int functions will fail correctly when passes NULL */
 	fail_unless(facund_object_set_int(NULL, -1) == -1, NULL);
@@ -191,42 +191,42 @@ START_TEST(pkg_freebsd_object_int_null)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_int_create)
+START_TEST(facund_object_int_create)
 {
 	/* Tests accessing an unassigned int will fail */
 	test_object_create(int, FACUND_INT, 0);
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_int_zero)
+START_TEST(facund_object_int_zero)
 {
 	/* Test accessing an object set to 0 will succeed */
 	test_object_assign(int, "int", 0, "0");
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_int_zero_from_str)
+START_TEST(facund_object_int_zero_from_str)
 {
 	/* Test accessing an object set to 0 from a string will succeed */
 	test_object_assign_from_string(int, "int", 0, "0", "0");
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_int_min)
+START_TEST(facund_object_int_min)
 {
 	/* Test accessing an object set to -2147483648 will succeed */
 	test_object_assign(int, "int", INT32_MIN, "-2147483648");
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_int_min_from_str)
+START_TEST(facund_object_int_min_from_str)
 {
 	test_object_assign_from_string(int, "int", INT32_MIN, "-2147483648",
 	    "-2147483648");
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_int_bad_min_from_str)
+START_TEST(facund_object_int_bad_min_from_str)
 {
 	struct facund_object *obj;
 
@@ -245,21 +245,21 @@ START_TEST(pkg_freebsd_object_int_bad_min_from_str)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_int_max)
+START_TEST(facund_object_int_max)
 {
 	/* Test accessing an object set to 2147483647 will succeed */
 	test_object_assign(int, "int", INT32_MAX, "2147483647");
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_int_max_from_str)
+START_TEST(facund_object_int_max_from_str)
 {
 	test_object_assign_from_string(int, "int", INT32_MAX, "2147483647",
 	    "2147483647");
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_int_bad_max_from_str)
+START_TEST(facund_object_int_bad_max_from_str)
 {
 	struct facund_object *obj;
 
@@ -278,7 +278,7 @@ START_TEST(pkg_freebsd_object_int_bad_max_from_str)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_int_bad_from_str)
+START_TEST(facund_object_int_bad_from_str)
 {
 	struct facund_object *obj;
 
@@ -297,7 +297,7 @@ START_TEST(pkg_freebsd_object_int_bad_from_str)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_int_error)
+START_TEST(facund_object_int_error)
 {
 	/* Test errors are set/reset correctly */
 	test_object_error(int);
@@ -314,7 +314,7 @@ END_TEST
 /*
  * Tests for an unsigned integer facund_object
  */
-START_TEST(pkg_freebsd_object_uint_null)
+START_TEST(facund_object_uint_null)
 {
 	/* Test if uint functions will fail correctly when passes NULL */
 	fail_unless(facund_object_set_uint(NULL, 0) == -1, NULL);
@@ -323,27 +323,27 @@ START_TEST(pkg_freebsd_object_uint_null)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_uint_create)
+START_TEST(facund_object_uint_create)
 {
 	/* Test accessing an unassigned unsigned int will fail */
 	test_object_create(uint, FACUND_UINT, 0);
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_uint_min)
+START_TEST(facund_object_uint_min)
 {
 	/* Test accessing an object set to 0 will succeed */
 	test_object_assign(uint, "unsigned int", 0, "0");
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_uint_min_from_str)
+START_TEST(facund_object_uint_min_from_str)
 {
 	test_object_assign_from_string(uint, "unsigned int", 0, "0", "0");
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_uint_bad_min_from_str)
+START_TEST(facund_object_uint_bad_min_from_str)
 {
 	struct facund_object *obj;
 
@@ -362,21 +362,21 @@ START_TEST(pkg_freebsd_object_uint_bad_min_from_str)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_uint_max)
+START_TEST(facund_object_uint_max)
 {
 	/* Test accessing an object set to 4294967295 will succeed */
 	test_object_assign(uint, "unsigned int", UINT32_MAX, "4294967295");
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_uint_max_from_str)
+START_TEST(facund_object_uint_max_from_str)
 {
 	test_object_assign_from_string(uint, "unsigned int", UINT32_MAX,
 	    "4294967295", "4294967295");
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_uint_bad_max_from_str)
+START_TEST(facund_object_uint_bad_max_from_str)
 {
 	struct facund_object *obj;
 
@@ -395,7 +395,7 @@ START_TEST(pkg_freebsd_object_uint_bad_max_from_str)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_uint_bad_from_str)
+START_TEST(facund_object_uint_bad_from_str)
 {
 	struct facund_object *obj;
 
@@ -414,7 +414,7 @@ START_TEST(pkg_freebsd_object_uint_bad_from_str)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_uint_error)
+START_TEST(facund_object_uint_error)
 {
 	/* Test errors are set/reset correctly */
 	test_object_error(uint);
@@ -430,7 +430,7 @@ END_TEST
 /*
  * Tests for a string facund_object
  */
-START_TEST(pkg_freebsd_object_string_null)
+START_TEST(facund_object_string_null)
 {
 	/* Test if string functions will fail correctly when passes NULL */
 	fail_unless(facund_object_set_string(NULL, NULL) == -1, NULL);
@@ -439,7 +439,7 @@ START_TEST(pkg_freebsd_object_string_null)
 }
 END_TEST
 
-START_TEST(pkg_freebsd_object_string_create)
+START_TEST(facund_object_string_create)
 {
 	/* Test accessing an unassigned string will fail */
 	test_object_create(string, FACUND_STRING, 0);
@@ -460,46 +460,46 @@ facund_object_suite()
 	s = suite_create("facund_object");
 
 	tc = tcase_create("boolean");
-	tcase_add_test(tc, pkg_freebsd_object_bool_null);
-	tcase_add_test(tc, pkg_freebsd_object_bool_create);
-	tcase_add_test(tc, pkg_freebsd_object_bool_true);
-	tcase_add_test(tc, pkg_freebsd_object_bool_false);
-	tcase_add_test(tc, pkg_freebsd_object_bool_true_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_bool_false_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_bool_error);
+	tcase_add_test(tc, facund_object_bool_null);
+	tcase_add_test(tc, facund_object_bool_create);
+	tcase_add_test(tc, facund_object_bool_true);
+	tcase_add_test(tc, facund_object_bool_false);
+	tcase_add_test(tc, facund_object_bool_true_from_str);
+	tcase_add_test(tc, facund_object_bool_false_from_str);
+	tcase_add_test(tc, facund_object_bool_error);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("integer");
-	tcase_add_test(tc, pkg_freebsd_object_int_null);
-	tcase_add_test(tc, pkg_freebsd_object_int_create);
-	tcase_add_test(tc, pkg_freebsd_object_int_zero);
-	tcase_add_test(tc, pkg_freebsd_object_int_zero_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_int_min);
-	tcase_add_test(tc, pkg_freebsd_object_int_min_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_int_bad_min_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_int_max);
-	tcase_add_test(tc, pkg_freebsd_object_int_max_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_int_bad_max_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_int_bad_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_int_error);
+	tcase_add_test(tc, facund_object_int_null);
+	tcase_add_test(tc, facund_object_int_create);
+	tcase_add_test(tc, facund_object_int_zero);
+	tcase_add_test(tc, facund_object_int_zero_from_str);
+	tcase_add_test(tc, facund_object_int_min);
+	tcase_add_test(tc, facund_object_int_min_from_str);
+	tcase_add_test(tc, facund_object_int_bad_min_from_str);
+	tcase_add_test(tc, facund_object_int_max);
+	tcase_add_test(tc, facund_object_int_max_from_str);
+	tcase_add_test(tc, facund_object_int_bad_max_from_str);
+	tcase_add_test(tc, facund_object_int_bad_from_str);
+	tcase_add_test(tc, facund_object_int_error);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("unsigned integer");
-	tcase_add_test(tc, pkg_freebsd_object_uint_null);
-	tcase_add_test(tc, pkg_freebsd_object_uint_create);
-	tcase_add_test(tc, pkg_freebsd_object_uint_min);
-	tcase_add_test(tc, pkg_freebsd_object_uint_min_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_uint_bad_min_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_uint_max);
-	tcase_add_test(tc, pkg_freebsd_object_uint_max_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_uint_bad_max_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_uint_bad_from_str);
-	tcase_add_test(tc, pkg_freebsd_object_uint_error);
+	tcase_add_test(tc, facund_object_uint_null);
+	tcase_add_test(tc, facund_object_uint_create);
+	tcase_add_test(tc, facund_object_uint_min);
+	tcase_add_test(tc, facund_object_uint_min_from_str);
+	tcase_add_test(tc, facund_object_uint_bad_min_from_str);
+	tcase_add_test(tc, facund_object_uint_max);
+	tcase_add_test(tc, facund_object_uint_max_from_str);
+	tcase_add_test(tc, facund_object_uint_bad_max_from_str);
+	tcase_add_test(tc, facund_object_uint_bad_from_str);
+	tcase_add_test(tc, facund_object_uint_error);
 	suite_add_tcase(s, tc);
 
 	tc = tcase_create("string");
-	tcase_add_test(tc, pkg_freebsd_object_string_null);
-	tcase_add_test(tc, pkg_freebsd_object_string_create);
+	tcase_add_test(tc, facund_object_string_null);
+	tcase_add_test(tc, facund_object_string_create);
 	suite_add_tcase(s, tc);
 
 	return s;
