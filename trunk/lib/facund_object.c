@@ -86,12 +86,24 @@ facund_object_get_bool(const struct facund_object *obj)
 {
 	struct facund_object *real_obj;
 
-	/* TODO: Change these to proper checks */
-	assert(obj != NULL);
-	assert(obj->obj_type == FACUND_BOOL);
+	if (obj == NULL) {
+		return -1;
+	}
+
+	/* Get an object we can edit */
+	real_obj =  __DECONST(struct facund_object *, obj);
+
+	if (obj->obj_type != FACUND_BOOL) {
+		real_obj->obj_error = FACUND_OBJECT_ERROR_WRONG_TYPE;
+		return -1;
+	}
+
+	if (obj->obj_assigned == 0) {
+		real_obj->obj_error = FACUND_OBJECT_ERROR_UNASSIGNED;
+		return -1;
+	}
 	assert(obj->obj_assigned == 1);
 
-	real_obj =  __DECONST(struct facund_object *, obj);
 	real_obj->obj_error = FACUND_OBJECT_ERROR_NONE;
 	return obj->obj_int;
 }
@@ -131,12 +143,24 @@ facund_object_get_int(const struct facund_object *obj)
 {
 	struct facund_object *real_obj;
 
-	/* TODO: Change these to proper checks */
-	assert(obj != NULL);
-	assert(obj->obj_type == FACUND_INT);
+	if (obj == NULL) {
+		return 0;
+	}
+
+	/* Get an object we can edit */
+	real_obj =  __DECONST(struct facund_object *, obj);
+
+	if (obj->obj_type != FACUND_INT) {
+		real_obj->obj_error = FACUND_OBJECT_ERROR_WRONG_TYPE;
+		return 0;
+	}
+
+	if (obj->obj_assigned == 0) {
+		real_obj->obj_error = FACUND_OBJECT_ERROR_UNASSIGNED;
+		return 0;
+	}
 	assert(obj->obj_assigned == 1);
 
-	real_obj =  __DECONST(struct facund_object *, obj);
 	real_obj->obj_error = FACUND_OBJECT_ERROR_NONE;
 	return obj->obj_int;
 }
@@ -176,9 +200,22 @@ facund_object_get_uint(const struct facund_object *obj)
 {
 	struct facund_object *real_obj;
 
-	/* TODO: Change these to proper checks */
-	assert(obj != NULL);
-	assert(obj->obj_type == FACUND_UINT);
+	if (obj == NULL) {
+		return 0;
+	}
+
+	/* Get an object we can edit */
+	real_obj =  __DECONST(struct facund_object *, obj);
+
+	if (obj->obj_type != FACUND_UINT) {
+		real_obj->obj_error = FACUND_OBJECT_ERROR_WRONG_TYPE;
+		return 0;
+	}
+
+	if (obj->obj_assigned == 0) {
+		real_obj->obj_error = FACUND_OBJECT_ERROR_UNASSIGNED;
+		return 0;
+	}
 	assert(obj->obj_assigned == 1);
 
 	real_obj =  __DECONST(struct facund_object *, obj);
@@ -233,12 +270,24 @@ facund_object_get_string(const struct facund_object *obj)
 {
 	struct facund_object *real_obj;
 
-	/* TODO: Change these to proper checks */
-	assert(obj != NULL);
-	assert(obj->obj_type == FACUND_STRING);
+	if (obj == NULL) {
+		return NULL;
+	}
+
+	/* Get an object we can edit */
+	real_obj =  __DECONST(struct facund_object *, obj);
+
+	if (obj->obj_type != FACUND_STRING) {
+		real_obj->obj_error = FACUND_OBJECT_ERROR_WRONG_TYPE;
+		return NULL;
+	}
+
+	if (obj->obj_assigned == 0) {
+		real_obj->obj_error = FACUND_OBJECT_ERROR_UNASSIGNED;
+		return NULL;
+	}
 	assert(obj->obj_assigned == 1);
 
-	real_obj =  __DECONST(struct facund_object *, obj);
 	real_obj->obj_error = FACUND_OBJECT_ERROR_NONE;
 
 	return obj->obj_string;
@@ -299,14 +348,29 @@ facund_object_get_array_item(const struct facund_object *obj, unsigned int pos)
 {
 	struct facund_object *real_obj;
 
-	/* TODO: Change these to proper checks */
-	assert(obj != NULL);
-	assert(obj->obj_type == FACUND_ARRAY);
-	assert(obj->obj_assigned == 1);
-	if (pos >= obj->obj_array_count)
+	if (obj == NULL) {
 		return NULL;
+	}
 
+	/* Get an object we can edit */
 	real_obj =  __DECONST(struct facund_object *, obj);
+
+	if (obj->obj_type != FACUND_ARRAY) {
+		real_obj->obj_error = FACUND_OBJECT_ERROR_WRONG_TYPE;
+		return NULL;
+	}
+
+	if (obj->obj_assigned == 0) {
+		real_obj->obj_error = FACUND_OBJECT_ERROR_UNASSIGNED;
+		return NULL;
+	}
+	assert(obj->obj_assigned == 1);
+
+	if (pos >= obj->obj_array_count) {
+		real_obj->obj_error = FACUND_OBJECT_ERROR_NO_OBJECT;
+		return NULL;
+	}
+
 	real_obj->obj_error = FACUND_OBJECT_ERROR_NONE;
 	return obj->obj_array[pos];
 }
@@ -370,7 +434,11 @@ facund_object_new_from_typestr(const char *type)
 int
 facund_object_set_from_str(struct facund_object *obj, const char *value)
 {
-	if (obj == NULL || value == NULL) {
+	if (obj == NULL) {
+		return -1;
+	}
+	if (value == NULL) {
+		obj->obj_error = FACUND_OBJECT_ERROR_BADSTRING;
 		return -1;
 	}
 
@@ -384,7 +452,7 @@ facund_object_set_from_str(struct facund_object *obj, const char *value)
 
 		data = strtonum(value, INT32_MIN, INT32_MAX, &errstr);
 		if (errstr != NULL) {
-			/* TODO: Error handeling */
+			obj->obj_error = FACUND_OBJECT_ERROR_BADSTRING;
 			return -1;
 		}
 		return facund_object_set_int(obj, data);
@@ -395,7 +463,7 @@ facund_object_set_from_str(struct facund_object *obj, const char *value)
 
 		data = strtonum(value, 0, UINT32_MAX, &errstr);
 		if (errstr != NULL) {
-			/* TODO: Error handeling */
+			obj->obj_error = FACUND_OBJECT_ERROR_BADSTRING;
 			return -1;
 		}
 		return facund_object_set_uint(obj, data);
@@ -429,7 +497,7 @@ facund_object_get_type(const struct facund_object *obj)
 const char *
 facund_object_xml_string(struct facund_object *obj __unused)
 {
-	if (obj == NULL)
+	if (obj == NULL || obj->obj_assigned == 0)
 		return NULL;
 
 	if (obj->obj_xml_string == NULL) {
@@ -462,6 +530,7 @@ facund_object_xml_string(struct facund_object *obj __unused)
 
 				curobj = __DECONST(struct facund_object *,
 				    facund_object_get_array_item(obj, pos));
+				assert(curobj->obj_assigned == 1);
 				tmpdata = facund_object_xml_string(curobj);
 
 				/* Append the new data to the end of the data */
@@ -539,6 +608,7 @@ facund_object_print(struct facund_object *obj)
 		}
 		}
 	} else {
+		assert(obj->obj_assigned == 0);
 		printf("Unassigned");
 	}
 
