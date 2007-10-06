@@ -59,6 +59,10 @@ facund_server_start(struct facund_conn *conn, long salt)
 {
 	char *str;
 
+	if (conn == NULL) {
+		return -1;
+	}
+
 	conn->close = 0;
 	conn->parser = XML_ParserCreate(NULL);
 	if (facund_accept(conn) == -1) {
@@ -98,6 +102,9 @@ facund_server_get_request(struct facund_conn *conn)
 	char *buf;
 	ssize_t len;
 
+	if (conn == NULL) {
+		return -1;
+	}
 	if (conn->close == 1) {
 		return 1;
 	}
@@ -119,6 +126,10 @@ int
 facund_server_finish(struct facund_conn *conn)
 {
 	const char *str;
+
+	if (conn == NULL) {
+		return -1;
+	}
 
 	str = "</facund-server>";
 	facund_send(conn, str, strlen(str));
@@ -144,23 +155,26 @@ facund_server_call(const char *name, const char *id, struct facund_object *arg)
 
 	resp = NULL;
 
-	/* Find the callback and execute it if it exists */
-	key.data = __DECONST(void *, name);
-	key.size = (strlen(name) + 1) * sizeof(char);
-	ret = call_db->get(call_db, &key, &data, 0);
-	if (ret == 0) {
-		/* Get the callback and execute it */
-		cb = *(facund_call_cb **)data.data;
-		assert(cb != NULL);
-		resp = cb(id, arg);
-		if (resp == NULL) {
-			/* TODO: Remove Magic Number */
-			resp = facund_response_new(id, 1,
-			    "Method returned an invalid response", NULL);
+	if (call_db != NULL) {
+		/* Find the callback and execute it if it exists */
+		key.data = __DECONST(void *, name);
+		key.size = (strlen(name) + 1) * sizeof(char);
+		ret = call_db->get(call_db, &key, &data, 0);
+		if (ret == 0) {
+			/* Get the callback and execute it */
+			cb = *(facund_call_cb **)data.data;
+			assert(cb != NULL);
+			resp = cb(id, arg);
+			if (resp == NULL) {
+				/* TODO: Remove Magic Number */
+				resp = facund_response_new(id, 1,
+				    "Method returned an invalid response",NULL);
+			}
 		}
-	} else {
-		/* TODO: Remove Magic Number */
-		resp = facund_response_new(id, 1, "Invalid request", NULL);
+	}
+	if (resp == NULL) {
+		resp = facund_response_new(id, RESP_UNKNOWN_CALL,
+		    "Unknown call", NULL);
 	}
 
 	return resp;
@@ -317,6 +331,14 @@ facund_server_end_tag(void *data, const XML_Char *name)
 		conn->call_arg = NULL;
 	} else if (strcmp(name, "data") == 0) {
 		/*
+		 * At this point the data item should have been set
+		 */
+		if (facund_object_is_assigned(conn->call_arg) == 0 &&
+		    conn->resp == NULL) {
+			conn->resp = facund_response_new(conn->call_id,
+			    RESP_EMPTY_VALUE, "Missing value", NULL);
+		}
+		/*
 		 *  Set the argument to the item's parent
 		 *  if it has one. ie. it's in an array
 		 */
@@ -339,12 +361,15 @@ facund_server_text(void *data, const XML_Char *str, int len)
 	conn = (struct facund_conn *)data;
 	if (conn->call_arg == NULL) {
 		return;
-	} else if (conn->call_arg->obj_assigned == 1) {
+	} else if (facund_object_is_assigned(conn->call_arg)) {
 		/* TODO: Return an error */
 		return;
-	} else if (conn->call_arg->obj_type == FACUND_ARRAY) {
+	} else if (facund_object_get_type(conn->call_arg) == FACUND_ARRAY) {
 		/* Arrays must not have any text within them */
-		/* TODO: Return an error */
+		if (conn->resp == NULL) {
+			conn->resp = facund_response_new(conn->call_id,
+			    RESP_INCORECT_DATA, "Invalid value", NULL);
+		}
 		return;
 	}
 
@@ -354,7 +379,12 @@ facund_server_text(void *data, const XML_Char *str, int len)
 		return;
 	}
 	strlcpy(text, str, len + 1);
-	facund_object_set_from_str(conn->call_arg, text);
+	if(facund_object_set_from_str(conn->call_arg, text) == -1) {
+		if (conn->resp == NULL) {
+			conn->resp = facund_response_new(conn->call_id,
+			    RESP_INCORECT_DATA, "Invalid value", NULL);
+		}
+	}
 
 	free(text);
 }
