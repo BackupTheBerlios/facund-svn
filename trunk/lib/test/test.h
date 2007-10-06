@@ -33,5 +33,6 @@
 Suite *facund_connection_suite(void);
 Suite *facund_object_suite(void);
 Suite *facund_response_suite(void);
+Suite *facund_server_suite(void);
 
 #endif /* FACND_TEST_H */

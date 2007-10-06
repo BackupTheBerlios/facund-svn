@@ -1,12 +1,12 @@
 PROG=	tests
 SRCS=	main.c test_facund_connection.c test_facund_object.c \
-	test_facund_response.c
+	test_facund_response.c test_facund_server.c
 
 WARNS?=		6
 
 # libfacund
 CFLAGS+=	-I${.CURDIR}/..
-LDADD+=		${.OBJDIR}/../libfacund.a
+LDADD+=		${.OBJDIR}/../libfacund.a -lbsdxml
 
 # libcheck
 CFLAGS+=	-I/usr/local/include

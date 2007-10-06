@@ -50,6 +50,10 @@ START_TEST(facund_response_correct)
 	fail_unless(strcmp(
 	    "<response id=\"id\" code=\"0\" message=\"msg\"></response>",
 	    facund_response_string(resp)) == 0, NULL);
+	fail_unless(facund_response_set_id(resp, "foo") == 0, NULL);
+	fail_unless(strcmp(
+	    "<response id=\"foo\" code=\"0\" message=\"msg\"></response>",
+	    facund_response_string(resp)) == 0, NULL);
 	facund_response_free(resp);
 }
 END_TEST
@@ -80,6 +84,10 @@ START_TEST(facund_response_correct_no_id)
 	    != NULL, NULL);
 	fail_unless(strcmp(
 	    "<response code=\"0\" message=\"msg\"></response>",
+	    facund_response_string(resp)) == 0, NULL);
+	fail_unless(facund_response_set_id(resp, "foo") == 0, NULL);
+	fail_unless(strcmp(
+	    "<response id=\"foo\" code=\"0\" message=\"msg\"></response>",
 	    facund_response_string(resp)) == 0, NULL);
 	facund_response_free(resp);
 }
