@@ -31,6 +31,7 @@
 
 #include <sys/stat.h>
 
+#include <stdlib.h>
 #include <string.h>
 
 /*
@@ -47,6 +48,9 @@ START_TEST(facund_connection_server_good)
 {
 	struct facund_conn *conn;
 	struct stat sb;
+
+	/* Make sure the socket is removed */
+	system("rm -f /tmp/facund_test");
 
 	fail_unless((conn = facund_connect_server("/tmp/facund_test")) != NULL,
 	    NULL);
@@ -82,8 +86,11 @@ END_TEST
 START_TEST(facund_connection_cs_connects)
 {
 	char buf[5];
-
 	struct facund_conn *conn_s, *conn_c;
+
+	/* Make sure the socket is removed */
+	system("rm -f /tmp/facund_test");
+
 	fail_unless((conn_s = facund_connect_server("/tmp/facund_test"))
 	    != NULL, NULL);
 	fail_unless((conn_c = facund_connect_client("/tmp/facund_test"))
