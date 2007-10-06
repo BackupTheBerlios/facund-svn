@@ -81,6 +81,7 @@ int			 facund_object_set_from_str(struct facund_object *,
 
 enum facund_object_error facund_object_get_error(const struct facund_object*);
 enum facund_type	 facund_object_get_type(const struct facund_object *);
+int			 facund_object_is_assigned(const struct facund_object*);
 const char		*facund_object_xml_string(struct facund_object *);
 void			 facund_object_print(struct facund_object *);
 

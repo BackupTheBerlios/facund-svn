@@ -411,6 +411,7 @@ facund_object_free(struct facund_object *obj)
 	if (obj->obj_xml_string != NULL)
 		free(obj->obj_xml_string);
 
+	memset(obj, 0, sizeof(struct facund_object));
 	free(obj);
 }
 
@@ -492,6 +493,12 @@ enum facund_type
 facund_object_get_type(const struct facund_object *obj)
 {
 	return obj->obj_type;
+}
+
+int
+facund_object_is_assigned(const struct facund_object *obj)
+{
+	return obj->obj_assigned == 1;
 }
 
 const char *
