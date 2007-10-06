@@ -106,6 +106,34 @@ facund_response_string(struct facund_response *resp)
 	return resp->resp_string;
 }
 
+int
+facund_response_set_id(struct facund_response *resp, const char *id)
+{
+	char *tmp;
+
+	if (resp == NULL || id == NULL) {
+		return -1;
+	}
+
+	tmp = strdup(id);
+	if (tmp == NULL) {
+		return -1;
+	}
+	if (resp->resp_id != NULL) {
+		free(resp->resp_id);
+	}
+	resp->resp_id = tmp;
+
+	/* Empty the resp_string cache */
+	if (resp->resp_string != NULL) {
+		free(resp->resp_string);
+		resp->resp_string = NULL;
+	}
+	
+
+	return 0;
+}
+
 /*
  * Free's a response after use
  */

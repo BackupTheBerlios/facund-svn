@@ -52,6 +52,8 @@ struct facund_object;
 struct facund_response	*facund_response_new(const char *, facund_response_code,
 			    const char *, struct facund_object *);
 const char		*facund_response_string(struct facund_response *);
+int			 facund_response_set_id(struct facund_response *,
+			    const char *);
 void			 facund_response_free(struct facund_response *);
 
 #endif /* FACUND_RESPONSE_H */
