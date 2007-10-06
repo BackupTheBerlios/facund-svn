@@ -3,6 +3,7 @@ SRCS=	main.c test_facund_connection.c test_facund_object.c \
 	test_facund_response.c test_facund_server.c
 
 WARNS?=		6
+CLEANFILES+=	tests.core
 
 # libfacund
 CFLAGS+=	-I${.CURDIR}/..
