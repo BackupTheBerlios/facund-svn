@@ -36,8 +36,8 @@ class Call:
 
 	def getCall(self):
 		# TODO: Use a better call ID
-		return "<call id=\"1\" name=\"%s\">%s</call>" % (self.__name,
-		    self.__args)
+		return "<call id=\"1\" name=\"%s\">%s</call>" \
+		    % (self.__name, self.__args)
 
 	def getID(self):
 		return 1
@@ -57,6 +57,10 @@ class Call:
 		self.__responseLock.release()
 
 class Response:
+	'''
+	A response is the data returned from a remote server when
+	issued a call.
+	'''
 	def __init__(self, id, code, message, data = None):
 		self.__id = id
 		self.__code = code
@@ -64,12 +68,50 @@ class Response:
 		self.__data = data
 
 	def __str__(self):
-		return "<response id=\"%s\" message=\"%s\" code=\"%s\">%s</response>" \
+		'''
+		Returns the XML string that can be sent to a client after
+		a call.
+
+		>>> import data
+		>>> b = data.Bool(False)
+		>>> str(Response(1, 0, 'Ok', b))
+		'<response id="1" message="Ok" code="0"><data type="bool">False</data></response>'
+		'''
+		return "<response id=\"%s\" message=\"%s\" code=\"%s\">" \
+		    "%s</response>" \
 		    % (self.__id, self.__message, self.__code, 
 		       str(self.__data or ''))
 
 	def getData(self):
+		'''
+		Gets the data object returned by the call. The data will
+		be a facund object when the response is from facund server.
+
+		>>> import data
+		>>> b = data.Bool(True)
+		>>> r = Response(1, 0, 'Ok', b)
+		>>> r.getData() is b
+		True
+		'''
+
 		return self.__data
 
 	def getCode(self):
+		'''
+		Returns the return code. It will be zero for a valid call
+		or non zero on failure.
+
+		>>> Response(1, 0, 'Ok').getCode()
+		0
+
+		>>> Response(2, 50, 'Failure').getCode()
+		50
+		'''
 		return self.__code
+
+def _test():
+	import doctest
+	doctest.testmod()
+
+if __name__ == "__main__":
+	_test()
